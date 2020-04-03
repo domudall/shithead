@@ -11,20 +11,18 @@ axios.get(`${baseURL}/create?playerName=jeff`).then(createResponse => {
       //   .get(`${baseURL}/start?gameID=${createResponse.data.gameID}`)
       //   .then(startResponse => {
       // console.log(startResponse.data);
-      setTimeout(() => {
-        axios
-          .get(`${baseURL}/status?gameID=${createResponse.data.gameID}`)
-          .then(statusResponse => {
-            console.log(statusResponse.data);
-            axios
-              .get(
-                `${baseURL}/play?gameID=${createResponse.data.gameID}&cardID=2&playerID=${createResponse.data.playerID}`
-              )
-              .then(playResponse => {
-                console.log(playResponse.data);
-              });
-          });
-      }, 10);
+      axios
+        .get(`${baseURL}/status?gameID=${createResponse.data.gameID}`)
+        .then(statusResponse => {
+          console.log(statusResponse.data);
+          axios
+            .get(
+              `${baseURL}/play?gameID=${createResponse.data.gameID}&cardID=2&playerID=${createResponse.data.playerID}`
+            )
+            .then(playResponse => {
+              console.log(playResponse.data);
+            });
+        });
       //     });
     });
 });

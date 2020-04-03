@@ -4,6 +4,7 @@ const app = express();
 const port = 3000;
 const Deck = require("card-deck");
 const { pusher } = require("./pusher/client");
+const { validateGameID } = require("./middleware/validation");
 const { cards } = require("./game/cards");
 
 const games = {};
