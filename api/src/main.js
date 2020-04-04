@@ -1,18 +1,20 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = 3000;
 const Deck = require("card-deck");
 const { pusher } = require("./pusher/client");
-const { validateGameID } = require("./middleware/validation");
 const { cards } = require("./game/cards");
 
 const games = {};
 
+app.use(cors());
+
 app.get("/status", (req, res) => {
   const gameID = req.query.gameID;
   if (typeof gameID === "undefined" || gameID === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game ID required"]
     });
@@ -21,7 +23,7 @@ app.get("/status", (req, res) => {
   const game = games[gameID];
 
   if (game.started === false) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game has not started"]
     });
@@ -33,7 +35,7 @@ app.get("/status", (req, res) => {
 app.get("/play", (req, res) => {
   const gameID = req.query.gameID;
   if (typeof gameID === "undefined" || gameID === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game ID required"]
     });
@@ -42,7 +44,7 @@ app.get("/play", (req, res) => {
   const game = games[gameID];
 
   if (game.started === false) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game has not started"]
     });
@@ -50,7 +52,7 @@ app.get("/play", (req, res) => {
 
   const cardID = req.query.cardID;
   if (typeof cardID === "undefined" || cardID === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Card ID required"]
     });
@@ -58,7 +60,7 @@ app.get("/play", (req, res) => {
 
   const playerID = req.query.playerID;
   if (typeof playerID === "undefined" || playerID === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Player ID required"]
     });
@@ -66,7 +68,7 @@ app.get("/play", (req, res) => {
 
   const currentPlayer = game.state.players[game.state.turn];
   if (currentPlayer.id !== playerID) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["It is not your turn!"]
     });
@@ -74,7 +76,7 @@ app.get("/play", (req, res) => {
 
   const selectedCard = currentPlayer.hand[cardID];
   if (typeof selectedCard === "undefined") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Selected card doesn't exist"]
     });
@@ -94,7 +96,7 @@ app.get("/play", (req, res) => {
 app.get("/join", (req, res) => {
   const gameID = req.query.gameID;
   if (typeof gameID === "undefined" || gameID === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game ID required"]
     });
@@ -104,21 +106,21 @@ app.get("/join", (req, res) => {
 
   const playerName = req.query.playerName;
   if (typeof playerName === "undefined" || playerName === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Player name required"]
     });
   }
 
   if (typeof game === "undefined") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game does not exist"]
     });
   }
 
   if (game.started === true) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game has started"]
     });
@@ -127,7 +129,8 @@ app.get("/join", (req, res) => {
   const player = createPlayer(playerName);
   game.players.push(player);
   pusher.trigger(`game-${gameID}`, "player-joined", {
-    playerName: playerName
+    playerName: playerName,
+    message: `${playerName} has joined the game!`
   });
 
   res.json({ success: true, playerID: player.id });
@@ -136,7 +139,7 @@ app.get("/join", (req, res) => {
 app.get("/start", (req, res) => {
   const gameID = req.query.gameID;
   if (typeof gameID === "undefined" || gameID === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game ID required"]
     });
@@ -144,21 +147,21 @@ app.get("/start", (req, res) => {
 
   const game = games[gameID];
   if (typeof game === "undefined") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game does not exist"]
     });
   }
 
   if (game.started === true) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Game has started"]
     });
   }
 
   if (game.players.length < 2) {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Not enough players to start game"]
     });
@@ -174,7 +177,7 @@ app.get("/start", (req, res) => {
 app.get("/create", (req, res) => {
   const playerName = req.query.playerName;
   if (typeof playerName === "undefined" || playerName === "") {
-    return res.json({
+    return res.status(400).json({
       success: false,
       errors: ["Player name required"]
     });

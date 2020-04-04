@@ -3,6 +3,7 @@ import VueRouter from "vue-router";
 import App from "./App.vue";
 import Pusher from "pusher-js";
 import axios from "axios";
+import vuetify from './plugins/vuetify';
 
 Vue.config.productionTip = false;
 Pusher.logToConsole = true;
@@ -27,5 +28,6 @@ const router = new VueRouter({
 
 new Vue({
   router,
+  vuetify,
   render: h => h(App)
 }).$mount("#app");
